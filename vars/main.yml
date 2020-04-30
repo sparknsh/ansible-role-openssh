@@ -1,0 +1,57 @@
+---
+
+__openssh__packages:
+  default:
+    - openssh-server
+  Archlinux:
+    - openssh
+  openSUSE Leap:
+    - openssh
+
+openssh__packages: "{{ __openssh__packages[ansible_distribution] | default(__openssh__packages['default']) }}"
+
+__openssh__key_types:
+  default:
+    - rsa
+    - ecdsa
+    - ed25519
+  CentOS-6:
+    - rsa
+    - ecdsa
+
+openssh__key_types: "{{ __openssh__key_types[ansible_distribution ~ '-' ~ ansible_distribution_major_version] | default(__openssh__key_types['default']) }}"
+
+__openssh__run_directory:
+  default: /var/run/sshd/
+  Debian: /run/sshd
+  Ubuntu: /run/sshd
+
+openssh__run_directory: "{{ __openssh__run_directory[ansible_distribution] | default(__openssh__run_directory['default']) }}"
+
+openssh__configuration_file: /etc/ssh/sshd_config
+
+openssh__service: sshd
+
+__openssh__template_src:
+  default: sshd_config.j2
+  Alpine: sshd_config_Alpine.j2
+  Archlinux: sshd_config_Archlinux.j2
+  CentOS-6: sshd_config_CentOS-6.j2
+  CentOS-7: sshd_config_CentOS-7.j2
+  Debian: sshd_config_Debian.j2
+  Fedora: sshd_config_Fedora.j2
+  openSUSE Leap: sshd_config_openSUSE.j2
+  Ubuntu: sshd_config_Debian.j2
+
+openssh__template_src: "{{ __openssh__template_src['default'] }}"
+
+__openssh__template_mode:
+  Alpine: "0644"
+  Archlinux: "0644"
+  CentOS: "0600"
+  Debian: "0644"
+  Fedora: "0600"
+  openSUSE Leap: "0640"
+  Ubuntu: "0644"
+
+openssh__template_mode: "{{ __openssh__template_mode[ansible_distribution] }}"

@@ -1,0 +1,45 @@
+---
+
+- name: install openssh
+  package:
+    name: "{{ openssh__packages }}"
+    state: present
+
+- name: configure selinux to allow openssh__port
+  seport:
+    ports: "{{ openssh__port }}"
+    proto: "tcp"
+    setype: "ssh_port_t"
+    state: "present"
+  when:
+    - ansible_selinux.status is defined
+    - ansible_selinux.status == "enabled"
+
+- name: generate host key
+  command: "/usr/bin/ssh-keygen -q -t {{ item }} -f /etc/ssh/ssh_host_{{ item }}_key -C '' -N ''"
+  args:
+    creates: "/etc/ssh/ssh_host_{{ item }}_key"
+  with_items:
+    - "{{ openssh__key_types }}"
+
+- name: make run directory
+  file:
+    path: "{{ openssh__run_directory }}"
+    state: directory
+
+- name: configure openssh
+  template:
+    dest: "{{ openssh__configuration_file }}"
+    src: "{{ openssh__template_src }}"
+    mode: "{{ openssh__template_mode }}"
+    owner: root
+    group: root
+    validate: sshd -f %s -t
+  notify:
+    - restart openssh
+
+- name: start and enable openssh
+  service:
+    name: "{{ openssh__service }}"
+    state: started
+    enabled: true

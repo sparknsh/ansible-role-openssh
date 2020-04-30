@@ -1,0 +1,140 @@
+# {{ ansible_managed }}
+
+# This is the sshd server system-wide configuration file.  See
+# sshd_config(5) for more information.
+
+# This sshd was compiled with PATH=/usr/bin:/bin:/usr/sbin:/sbin
+
+# The strategy used for options in the default sshd_config shipped with
+# OpenSSH is to specify options with their default value where
+# possible, but leave them commented.  Uncommented options override the
+# default value.
+
+{{ '#' if openssh__port is not defined else '' }}Port {{ openssh__port | default('22', true) }}
+{{ '#' if openssh__address_family is not defined else '' }}AddressFamily {{ openssh__address_family | default('any', true) }}
+{% if openssh__listen_address is defined %}
+{% for address in openssh__listen_address %}
+ListenAddress {{ address }}
+{% endfor %}
+{% else %}
+#ListenAddress 0.0.0.0
+#ListenAddress ::
+{% endif %}
+
+{% if openssh__host_key is defined %}
+{% for hostkey in openssh__host_key %}
+HostKey {{ hostkey }}
+{% endfor %}
+{% else %}
+#HostKey /etc/ssh/ssh_host_rsa_key
+#HostKey /etc/ssh/ssh_host_ecdsa_key
+#HostKey /etc/ssh/ssh_host_ed25519_key
+{% endif %}
+
+# Ciphers and keying
+{{ '#' if openssh__rekey_limit is not defined else '' }}RekeyLimit {{ openssh__rekey_limit | default('default none', true) }}
+
+# Logging
+{{ '#' if openssh__syslog_facility is not defined else '' }}SyslogFacility {{ openssh__syslog_facility | default('AUTH', true) }}
+{{ '#' if openssh__loglevel is not defined else '' }}LogLevel {{ openssh__loglevel | default('INFO', true) }}
+
+# Authentication:
+
+{{ '#' if openssh__login_grace_time is not defined else '' }}LoginGraceTime {{ openssh__login_grace_time | default('2m', true) }}
+{{ '#' if openssh__permit_root_login is not defined else '' }}PermitRootLogin {{ openssh__permit_root_login | default('prohibit-password', true) }}
+{{ '#' if openssh__scrict_modes is not defined else '' }}StrictModes {{ openssh__scrict_modes | default('yes', true) }}
+{{ '#' if openssh__max_auth_tries is not defined else '' }}MaxAuthTries {{ openssh__max_auth_tries | default('6', true) }}
+{{ '#' if openssh__max_sessions is not defined else '' }}MaxSessions {{ openssh__max_sessions | default('10', true) }}
+
+{{ '#' if openssh__pub_key_authentication is not defined else '' }}PubkeyAuthentication {{ openssh__pub_key_authentication | default('yes', true)}}
+
+# Expect .ssh/authorized_keys2 to be disregarded by default in future.
+{{ '#' if openssh__authorized_key_file is not defined else '' }}AuthorizedKeysFile {{ openssh__authorized_key_file | default('.ssh/authorized_keys .ssh/authorized_keys2', true) }}
+
+{{ '#' if openssh__authorized_prinicpals_file is not defined else '' }}AuthorizedPrincipalsFile {{ openssh__authorized_prinicpals_file | default('none', true) }}
+
+{{ '#' if openssh__authorized_keys_comman is not defined else '' }}AuthorizedKeysCommand {{ openssh__authorized_keys_comman | default('none', true) }}
+{{ '#' if openssh__authorized_keys_command_user is not defined else '' }}AuthorizedKeysCommandUser {{ openssh__authorized_keys_command_user | default('nonody', true) }}
+
+# For this to work you will also need host keys in /etc/ssh/ssh_known_hosts
+{{ '#' if openssh__host_based_authentication is not defined else '' }}HostbasedAuthentication {{ openssh__host_based_authentication | default('no', true) }}
+# Change to yes if you don't trust ~/.ssh/known_hosts for
+# HostbasedAuthentication
+{{ '#' if openssh__ignore_user_known_hosts is not defined else '' }}IgnoreUserKnownHosts {{ openssh__ignore_user_known_hosts | default('no', true) }}
+# Don't read the user's ~/.rhosts and ~/.shosts files
+{{ '#' if openssh__ignore_rhosts is not defined else '' }}IgnoreRhosts {{ openssh__ignore_rhosts | default('yes', true) }}
+
+# To disable tunneled clear text passwords, change to no here!
+{{ '#' if openssh__password_authentication is not defined else '' }}PasswordAuthentication {{ openssh__password_authentication | default('yes', true) }}
+{{ '#' if openssh__permit_empty_passwords is not defined else '' }}PermitEmptyPasswords {{ openssh__permit_empty_passwords | default('no', true) }}
+
+# Change to yes to enable challenge-response passwords (beware issues with
+# some PAM modules and threads)
+{{ '#' if openssh__challenge_response_authentication is not defined else '' }}ChallengeResponseAuthentication {{ openssh__challenge_response_authentication | default('no', true) }}
+
+# Kerberos options
+{{ '#' if openssh__kerberos_authentication is not defined else '' }}KerberosAuthentication {{ openssh__kerberos_authentication | default('no', true) }}
+{{ '#' if openssh__kerberos_or_local_passwd is not defined else '' }}KerberosOrLocalPasswd {{ openssh__kerberos_or_local_passwd | default('yes', true) }}
+{{ '#' if openssh__kerberos_ticket_cleanup is not defined else '' }}KerberosTicketCleanup {{ openssh__kerberos_ticket_cleanup | default('yes', true) }}
+{{ '#' if openssh__kerberos_get_afs_token is not defined else '' }}KerberosGetAFSToken {{ openssh__kerberos_get_afs_token | default('no', true) }}
+
+# GSSAPI options
+{{ '#' if openssh__gssapi_authentication is not defined else '' }}GSSAPIAuthentication {{ openssh__gssapi_authentication | default('no', true) }}
+{{ '#' if openssh__gssapi_cleanup_credentials is not defined else '' }}GSSAPICleanupCredentials {{ openssh__gssapi_cleanup_credentials | default('yes', true) }}
+{{ '#' if openssh__gssapi_strict_acceptor_check is not defined else '' }}GSSAPIStrictAcceptorCheck {{ openssh__gssapi_strict_acceptor_check | default('yes', true) }}
+{{ '#' if openssh__gssapi_key_exchange is not defined else '' }}GSSAPIKeyExchange {{ openssh__gssapi_key_exchange | default('no', true) }}
+
+# Set this to 'yes' to enable PAM authentication, account processing,
+# and session processing. If this is enabled, PAM authentication will
+# be allowed through the ChallengeResponseAuthentication and
+# PasswordAuthentication.  Depending on your PAM configuration,
+# PAM authentication via ChallengeResponseAuthentication may bypass
+# the setting of "PermitRootLogin without-password".
+# If you just want the PAM account and session checks to run without
+# PAM authentication, then enable this but set PasswordAuthentication
+# and ChallengeResponseAuthentication to 'no'.
+{{ '#' if openssh__use_pam is not defined else '' }}UsePAM {{ openssh__use_pam | default('yes', true) }}
+
+{{ '#' if openssh__allow_agent_forwarding is not defined else '' }}AllowAgentForwarding {{ openssh__allow_agent_forwarding | default('yes', true) }}
+{{ '#' if openssh__allow_tcp_forwarding is not defined else '' }}AllowTcpForwarding  {{ openssh__allow_tcp_forwarding | default('yes', true) }}
+{{ '#' if openssh__gateway_ports is not defined else '' }}GatewayPorts {{ openssh__gateway_ports | default('no', true) }}
+{{ '#' if openssh__x11_forwarding is not defined else '' }}X11Forwarding {{ openssh__x11_forwarding | default('yes', true) }}
+{{ '#' if openssh__x11_display_offset  is not defined else '' }}X11DisplayOffset {{ openssh__x11_display_offset | default('10', true) }}
+{{ '#' if openssh__x11_use_localhost is not defined else '' }}X11UseLocalhost {{ openssh__x11_use_localhost | default('yes', true) }}
+{{ '#' if openssh__permit_tty is not defined else '' }}PermitTTY {{ openssh__permit_tty | default('yes', true) }}
+{{ '#' if openssh__print_motd is not defined else '' }}PrintMotd {{ openssh__print_motd | default('no', true) }}
+{{ '#' if openssh__print_last_log is not defined else '' }}PrintLastLog {{ openssh__print_last_log | default('yes', true) }}
+{{ '#' if openssh__tcp_keep_alive is not defined else '' }}TCPKeepAlive {{ openssh__tcp_keep_alive | default('yes', true) }}
+{{ '#' if openssh__use_login is not defined else '' }}UseLogin {{ openssh__user_login | default('no', true) }}
+{{ '#' if openssh__use_privilege_separation is not defined else '' }}UsePrivilegeSeparation {{ openssh__use_privilege_separation | default('sandbox', true) }}
+{{ '#' if openssh__permit_user_environment is not defined else '' }}PermitUserEnvironment {{ openssh__permit_user_environment | default('no', true) }}
+{{ '#' if openssh__compression is not defined else '' }}Compression {{ openssh__compression | default('delayed', true) }}
+{{ '#' if openssh__client_alive_interval is not defined else '' }}ClientAliveInterval {{ openssh__client_alive_interval | default('0', true) }}
+{{ '#' if openssh__client_alive_count_max is not defined else '' }}ClientAliveCountMax {{ openssh__client_alive_count_max | default('3', true) }}
+{{ '#' if openssh__use_dns is not defined else '' }}UseDNS {{ openssh__use_dns | default('no', true) }}
+{{ '#' if openssh__pid_file  is not defined else '' }}PidFile {{ openssh__pid_file | default('/var/run/sshd.pid', true) }}
+{{ '#' if openssh__max_startups is not defined else '' }}MaxStartups {{ openssh__max_startups | default('10:30:100', true) }}
+{{ '#' if openssh__permit_tunnel is not defined else '' }}PermitTunnel {{ openssh__permit_tunnel | default('no', true) }}
+{{ '#' if openssh__chroot_directory is not defined else '' }}ChrootDirectory {{ openssh__chroot_directory | default('none', true) }}
+{{ '#' if openssh__version_addendum is not defined else '' }}VersionAddendum {{ openssh__version_addendum | default('none', true) }}
+
+# no default banner path
+{{ '#' if openssh__banner is not defined else '' }}Banner {{ openssh__banner | default('none', true) }}
+
+# Allow client to pass locale environment variables
+{% if openssh__accept_env is defined %}
+AcceptEnv {% for item in openssh__accept_env %}{{ item }} {% endfor %}
+
+{% else %}
+AcceptEnv LANG LC_*
+{% endif %}
+
+# override default of no subsystems
+{{ '#' if openssh__subsystem is not defined else '' }}subsystem  {{ openssh__subsystem | default('sftp  /usr/lib/openssh/sftp-server', true) }}
+
+# Example of overriding settings on a per-user basis
+#Match User anoncvs
+# X11Forwarding no
+# AllowTcpForwarding no
+# PermitTTY no
+# ForceCommand cvs server
